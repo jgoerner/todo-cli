@@ -42,4 +42,3 @@ def new(task, due):
         sys.exit(1)
     due = "sometime" if due == "-1" else "in {} days".format(due)
     print("added {}, due {}".format(task, due))
-

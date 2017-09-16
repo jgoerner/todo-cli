@@ -2,6 +2,7 @@ import click
 import os
 import sys
 from .db_utils import insert_record, retrieve_record
+from .printing_utils import print_records
 
 
 @click.group()
@@ -25,14 +26,16 @@ def main(ctx, taskdb):
 
 
 @main.command()
-@click.option("--due", "-d", default="all", type=click.Choice(["all", "today"]))
+@click.option("--due", "-d", default="alltime",
+              type=click.Choice(["alltime", "today"]))
+@click.option("--all", is_flag=True, default=False)
 @click.pass_context
-def show(ctx, due):
+def show(ctx, due, all):
     """
     Show tasks based on <due>
     """
-    click.echo("SHOWING {} from {}".format(due, ctx.obj["DB"]))
-    retrieve_record(ctx.obj["DB"], due=due)
+    records = retrieve_record(ctx.obj["DB"], due=due, all=all)
+    print_records(records)
 
 
 @main.command()
@@ -46,6 +49,6 @@ def new(ctx, task, due):
     if task is None:
         click.echo("Please specify a task")
         sys.exit(1)
-    due = "sometime" if due == "-1" else "in {} days".format(due)
+    due = "sometime" if due == "-1" else "today"
     insert_record(ctx.obj["DB"], task=task, due=due)
     click.echo("'{}' successfully added to your todo list".format(task))

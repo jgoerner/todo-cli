@@ -7,6 +7,9 @@ import sys
 @click.pass_context
 @click.option("--taskdb", default=".")
 def main(ctx, taskdb):
+    """
+    Handle todos
+    """
     if taskdb == ".":
         matches = [match for match in os.listdir(".") if
                    match.endswith(".tdb")]

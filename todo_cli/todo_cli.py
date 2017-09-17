@@ -1,8 +1,8 @@
 import click
 import os
 import sys
-from .db_utils import insert_record, retrieve_record
-from .printing_utils import print_records
+from .db_utils import insert_record, retrieve_record, mark_done
+from .printing_utils import print_records, task_selection
 
 
 @click.group()
@@ -17,7 +17,7 @@ def main(ctx, taskdb):
                    match.endswith(".tdb")]
         if len(matches) != 1:
             click.echo("Could not find a distinct task db in current dir.")
-            click.echo("Please specify it directly.")
+            click.echo("Please specify it directly or create an empty *.tdb file")
             sys.exit(1)
         else:
             taskdb = matches[0]
@@ -52,3 +52,16 @@ def new(ctx, task, due):
     due = "sometime" if due == "-1" else "today"
     insert_record(ctx.obj["DB"], task=task, due=due)
     click.echo("'{}' successfully added to your todo list".format(task))
+
+
+@main.command()
+@click.pass_context
+def done(ctx):
+    """
+    Mark an "OPEN" task as "COMPLETED"
+    """
+    open_tasks = retrieve_record(ctx.obj["DB"], due="alltime", all=False)
+    choices = list(map(lambda dct: dct["task"], open_tasks))
+    done_idx = click.prompt(task_selection(choices), type=click.IntRange(1, len(choices)))
+    done = choices[done_idx-1]
+    mark_done(ctx.obj["DB"], task=done)

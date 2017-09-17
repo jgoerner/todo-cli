@@ -1,5 +1,6 @@
 import os
 from tinydb import TinyDB, Query
+from tinydb.operations import set as tdbset
 from contextlib import contextmanager
 
 
@@ -42,7 +43,7 @@ def _get_due_query(due):
     elif due == "today":
         query = "Query()['due'] == 'today'"
     else:
-        raise ValueError("{} is not a valid due parameter")
+        raise ValueError("{} is not a valid due parameter".format(due))
     return query
 
 
@@ -80,3 +81,12 @@ def retrieve_record(tinydb, **kwargs):
         result = eval(q)
         #print(result)
     return result
+
+
+def mark_done(tinydb, task):
+    """
+    Mark <task> as "CLOSED"
+    """
+    with get_tinydb(tinydb) as db:
+        db.update(tdbset("status", "CLOSED"), Query()["task"] == task)
+
